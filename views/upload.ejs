@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Photos</title>
+</head>
+<body>
+  <h1>Upload Photos</h1>
+
+  <!-- Login Form -->
+  <form id="loginForm">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+
+  <!-- Upload Form -->
+  <form id="uploadForm" style="display:none;" enctype="multipart/form-data">
+    <input type="file" name="photos" multiple />
+    <button type="submit">Upload</button>
+  </form>
+
+  <script>
+    // Handle login
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+      .then(response => response.json())
+.then(data => {
+  console.log('Login response data:', data); // Log the response data
+  if (data.token) {
+    localStorage.setItem('jwtToken', data.token);
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('uploadForm').style.display = 'block';
+  } else {
+    alert('Login failed: ' + (data.error || 'Unknown error'));
+  }
+ })
+ .catch(error => {
+        console.error('Error:', error);
+        alert('Login failed: ' + error.message);
+      });
+    });
+
+    // Handle file upload
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+      const token = localStorage.getItem('jwtToken');
+
+      fetch('/api/photos/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+          // Do not set 'Content-Type' header manually for FormData
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert('Upload successful: ' + data.message);
+        } else {
+          alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Upload failed: ' + error.message);
+      });
+    });
+  </script>
+</body>
+</html>
