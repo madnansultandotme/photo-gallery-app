@@ -28,5 +28,9 @@ app.use('/api/photos', photoRoutes);
 // Serve static files (for uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Export the app module for Vercel
-module.exports = app;
+// // Export the app module for Vercel
+// module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
